@@ -62,7 +62,7 @@ export default function VinylPlayer() {
 
   return (
     <motion.div
-      className="fixed z-40 cursor-pointer"
+      className="fixed z-40 cursor-pointer flex flex-col items-center"
       style={{ bottom: 24, left: 24 }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 0.85 }}
@@ -70,26 +70,66 @@ export default function VinylPlayer() {
       whileHover={{ opacity: 1, scale: 1.05 }}
       onClick={handleClick}
     >
-      {/* Circular vinyl container */}
-      <motion.div
-        animate={spinControls}
+      {/* Vinyl disc + pulse ring wrapper */}
+      <div style={{ position: "relative", width: 80, height: 80 }}>
+
+        {/* Pulsing ring — visible only when paused */}
+        <motion.span
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: "50%",
+            border: "1px solid rgba(255, 255, 255, 0.4)",
+          }}
+          animate={
+            isPlaying
+              ? { scale: 1, opacity: 0 }
+              : { scale: [1, 1.15, 1], opacity: [0.4, 0, 0.4] }
+          }
+          transition={
+            isPlaying
+              ? { duration: 0.2 }
+              : { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
+          }
+        />
+
+        {/* Spinning vinyl disc */}
+        <motion.div
+          animate={spinControls}
+          style={{
+            width: 80,
+            height: 80,
+            borderRadius: "50%",
+            overflow: "hidden",
+            position: "relative",
+          }}
+        >
+          <Image
+            src="/vinyl.png"
+            alt="Now playing"
+            fill
+            className="object-cover"
+            sizes="80px"
+            draggable={false}
+          />
+        </motion.div>
+      </div>
+
+      {/* play / pause label */}
+      <motion.p
+        animate={{ opacity: 0.5 }}
         style={{
-          width: 80,
-          height: 80,
-          borderRadius: "50%",
-          overflow: "hidden",
-          position: "relative",
+          marginTop: 6,
+          fontSize: 9,
+          letterSpacing: "0.2em",
+          color: "rgba(255, 255, 255, 0.5)",
+          fontFamily: "inherit",
+          userSelect: "none",
+          textTransform: "lowercase",
         }}
       >
-        <Image
-          src="/vinyl.png"
-          alt="Now playing"
-          fill
-          className="object-cover"
-          sizes="80px"
-          draggable={false}
-        />
-      </motion.div>
+        {isPlaying ? "pause" : "play"}
+      </motion.p>
     </motion.div>
   );
 }
