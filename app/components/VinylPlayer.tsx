@@ -2,7 +2,6 @@
 
 import { useRef, useState, useEffect } from "react";
 import { motion, useAnimationControls } from "framer-motion";
-import Image from "next/image";
 
 export default function VinylPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -21,15 +20,10 @@ export default function VinylPlayer() {
         setIsPlaying(true);
         spinControls.start({
           rotate: 360,
-          transition: {
-            duration: 8,
-            ease: "linear",
-            repeat: Infinity,
-            repeatType: "loop",
-          },
+          transition: { duration: 8, ease: "linear", repeat: Infinity, repeatType: "loop" },
         });
       }).catch(() => {
-        // Autoplay blocked by browser — user must click to start
+        // Autoplay blocked — user must click to start
       });
     }, 2500);
 
@@ -50,12 +44,7 @@ export default function VinylPlayer() {
       setIsPlaying(true);
       spinControls.start({
         rotate: 360,
-        transition: {
-          duration: 8,
-          ease: "linear",
-          repeat: Infinity,
-          repeatType: "loop",
-        },
+        transition: { duration: 8, ease: "linear", repeat: Infinity, repeatType: "loop" },
       });
     }
   }
@@ -63,73 +52,73 @@ export default function VinylPlayer() {
   return (
     <motion.div
       className="fixed z-40 cursor-pointer flex flex-col items-center"
-      style={{ bottom: 24, left: 24 }}
+      style={{ bottom: 24, left: 24, gap: 8 }}
       initial={{ opacity: 0 }}
-      animate={{ opacity: 0.85 }}
+      animate={{ opacity: 1 }}
       transition={{ delay: 2.5, duration: 1, ease: "easeOut" }}
-      whileHover={{ opacity: 1, scale: 1.05 }}
+      whileHover={{ scale: 1.05 }}
       onClick={handleClick}
     >
-      {/* Vinyl disc + pulse ring wrapper */}
+      {/* Relative wrapper for disc + ring */}
       <div style={{ position: "relative", width: 80, height: 80 }}>
 
-        {/* Pulsing ring — visible only when paused */}
+        {/* Pulsing ring — sits slightly outside the vinyl edge, z-index above disc */}
         <motion.span
           style={{
             position: "absolute",
-            inset: 0,
+            top: -4,
+            left: -4,
+            right: -4,
+            bottom: -4,
             borderRadius: "50%",
-            border: "1px solid rgba(255, 255, 255, 0.4)",
+            border: "1px solid rgba(255, 255, 255, 0.5)",
+            zIndex: 2,
+            pointerEvents: "none",
           }}
           animate={
             isPlaying
               ? { scale: 1, opacity: 0 }
-              : { scale: [1, 1.15, 1], opacity: [0.4, 0, 0.4] }
+              : { scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }
           }
           transition={
             isPlaying
-              ? { duration: 0.2 }
-              : { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
+              ? { duration: 0.3, ease: "easeOut" }
+              : { duration: 2, repeat: Infinity, ease: "easeInOut" }
           }
         />
 
         {/* Spinning vinyl disc */}
-        <motion.div
+        <motion.img
+          src="/vinyl.png"
+          alt="Now playing"
           animate={spinControls}
           style={{
             width: 80,
             height: 80,
             borderRadius: "50%",
-            overflow: "hidden",
+            objectFit: "cover",
+            display: "block",
+            zIndex: 1,
             position: "relative",
           }}
-        >
-          <Image
-            src="/vinyl.png"
-            alt="Now playing"
-            fill
-            className="object-cover"
-            sizes="80px"
-            draggable={false}
-          />
-        </motion.div>
+          draggable={false}
+        />
       </div>
 
-      {/* play / pause label */}
-      <motion.p
-        animate={{ opacity: 0.5 }}
+      {/* play / pause label — always rendered */}
+      <p
         style={{
-          marginTop: 6,
           fontSize: 9,
           letterSpacing: "0.2em",
-          color: "rgba(255, 255, 255, 0.5)",
-          fontFamily: "inherit",
+          textTransform: "uppercase",
+          color: "rgba(255, 255, 255, 0.55)",
           userSelect: "none",
-          textTransform: "lowercase",
+          lineHeight: 1,
+          margin: 0,
         }}
       >
         {isPlaying ? "pause" : "play"}
-      </motion.p>
+      </p>
     </motion.div>
   );
 }
