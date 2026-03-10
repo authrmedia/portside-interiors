@@ -1,0 +1,110 @@
+"use client";
+
+import { useRef } from "react";
+import Image from "next/image";
+import {
+  motion,
+  useMotionValue,
+  useSpring,
+  useTransform,
+} from "framer-motion";
+import { markers } from "@/app/lib/markerData";
+import HeroMarker from "@/app/components/HeroMarker";
+import HeroTitle from "@/app/components/HeroTitle";
+
+// Parallax travel in px — small enough that overflow:hidden never reveals dark bg
+const PARALLAX_RANGE = 6;
+
+export default function HeroScene() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const rawX = useMotionValue(0);
+  const rawY = useMotionValue(0);
+
+  const springX = useSpring(rawX, { stiffness: 60, damping: 20 });
+  const springY = useSpring(rawY, { stiffness: 60, damping: 20 });
+
+  const bgX = useTransform(springX, [-1, 1], [-PARALLAX_RANGE, PARALLAX_RANGE]);
+  const bgY = useTransform(springY, [-1, 1], [-PARALLAX_RANGE, PARALLAX_RANGE]);
+
+  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    rawX.set(((e.clientX - rect.left) / rect.width) * 2 - 1);
+    rawY.set(((e.clientY - rect.top) / rect.height) * 2 - 1);
+  }
+
+  function handleMouseLeave() {
+    rawX.set(0);
+    rawY.set(0);
+  }
+
+  const markerBaseDelay = 1.2;
+  const markerStagger = 0.1;
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative w-screen h-screen overflow-hidden"
+      style={{ background: "#0a0a0a" }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* Image layer — slightly oversized so parallax shift is hidden by overflow:hidden */}
+        <motion.div
+          className="absolute z-0"
+          style={{
+            x: bgX,
+            y: bgY,
+            width: `calc(100% + ${PARALLAX_RANGE * 2}px)`,
+            height: `calc(100% + ${PARALLAX_RANGE * 2}px)`,
+            top: -PARALLAX_RANGE,
+            left: -PARALLAX_RANGE,
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+        >
+          <Image
+            src="/portside-hero.png"
+            alt="Portside Interiors — penthouse living room at dusk"
+            fill
+            priority
+            quality={95}
+            className="object-cover object-center"
+            sizes="100vw"
+          />
+        </motion.div>
+
+        {/* Very subtle dark veil for text legibility */}
+        <div className="absolute inset-0 z-10 bg-black/18 pointer-events-none" />
+
+        {/* Title — absolutely positioned inside the locked frame */}
+        <HeroTitle />
+
+        {/* Markers — percentages now map exactly to the uncropped image */}
+        {markers.map((marker, i) => (
+          <HeroMarker
+            key={marker.id}
+            marker={marker}
+            enterDelay={markerBaseDelay + i * markerStagger}
+          />
+        ))}
+
+        {/* Bottom-left atmospheric label */}
+        <motion.p
+          className="absolute bottom-8 left-10 z-20 text-[10px] tracking-[0.3em] uppercase text-[#f5f0eb]/45 pointer-events-none"
+          style={{ fontFamily: "'Cormorant Garamond', serif" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{
+            delay: markerBaseDelay + markers.length * markerStagger + 0.3,
+            duration: 1,
+            ease: "easeOut",
+          }}
+        >
+          Explore
+        </motion.p>
+    </div>
+  );
+}
