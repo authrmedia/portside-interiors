@@ -17,4 +17,6 @@ body {
   width: 100%;
   height: 100%;
   background: #000;
+  /* Allow horizontal scroll on mobile so the hero composition never gets clipped */
+  overflow-x: auto;
 }

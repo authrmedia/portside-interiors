@@ -15,6 +15,9 @@ import HeroTitle from "@/app/components/HeroTitle";
 // Parallax travel in px — small enough that overflow:hidden never reveals dark bg
 const PARALLAX_RANGE = 6;
 
+// Minimum scene width — keeps the desktop composition intact on narrow viewports
+const MIN_SCENE_WIDTH = 1200;
+
 export default function HeroScene() {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -43,14 +46,29 @@ export default function HeroScene() {
   const markerStagger = 0.1;
 
   return (
+    // Outer scroll shell — exactly viewport-sized, scrolls content horizontally on mobile
     <div
-      ref={containerRef}
-      className="relative w-screen h-screen overflow-hidden"
-      style={{ background: "#0a0a0a" }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
+      style={{
+        width: "100vw",
+        height: "100vh",
+        overflowX: "auto",
+        overflowY: "hidden",
+        background: "#0a0a0a",
+      }}
     >
-      {/* Image layer — slightly oversized so parallax shift is hidden by overflow:hidden */}
+      {/* Inner scene frame — never shrinks below MIN_SCENE_WIDTH so composition stays intact */}
+      <div
+        ref={containerRef}
+        className="relative overflow-hidden"
+        style={{
+          width: `max(100vw, ${MIN_SCENE_WIDTH}px)`,
+          height: "100vh",
+          background: "#0a0a0a",
+        }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Image layer — slightly oversized so parallax shift is hidden by overflow:hidden */}
         <motion.div
           className="absolute z-0"
           style={{
@@ -79,10 +97,10 @@ export default function HeroScene() {
         {/* Very subtle dark veil for text legibility */}
         <div className="absolute inset-0 z-10 bg-black/18 pointer-events-none" />
 
-        {/* Title — absolutely positioned inside the locked frame */}
+        {/* Title — absolutely positioned inside the scene frame, scrolls with content */}
         <HeroTitle />
 
-        {/* Markers — percentages now map exactly to the uncropped image */}
+        {/* Markers — percentages map to the scene frame, never drift */}
         {markers.map((marker, i) => (
           <HeroMarker
             key={marker.id}
@@ -90,7 +108,7 @@ export default function HeroScene() {
             enterDelay={markerBaseDelay + i * markerStagger}
           />
         ))}
-
+      </div>
     </div>
   );
 }
