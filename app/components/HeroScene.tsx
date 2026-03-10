@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import Image from "next/image";
 import {
   motion,
@@ -19,7 +19,17 @@ const PARALLAX_RANGE = 6;
 const MIN_SCENE_WIDTH = 1200;
 
 export default function HeroScene() {
+  const scrollRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // On mount, center the horizontal scroll position on mobile
+  useEffect(() => {
+    if (scrollRef.current) {
+      const el = scrollRef.current;
+      const centerX = (el.scrollWidth - el.clientWidth) / 2;
+      el.scrollLeft = centerX;
+    }
+  }, []);
 
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
@@ -48,6 +58,7 @@ export default function HeroScene() {
   return (
     // Outer scroll shell — exactly viewport-sized, scrolls content horizontally on mobile
     <div
+      ref={scrollRef}
       style={{
         width: "100vw",
         height: "100vh",
