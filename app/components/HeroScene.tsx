@@ -91,20 +91,6 @@ export default function HeroScene() {
           />
         ))}
 
-        {/* Bottom-left atmospheric label */}
-        <motion.p
-          className="absolute bottom-8 left-10 z-20 text-[10px] tracking-[0.3em] uppercase text-[#f5f0eb]/45 pointer-events-none"
-          style={{ fontFamily: "'Cormorant Garamond', serif" }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{
-            delay: markerBaseDelay + markers.length * markerStagger + 0.3,
-            duration: 1,
-            ease: "easeOut",
-          }}
-        >
-          Explore
-        </motion.p>
     </div>
   );
 }
